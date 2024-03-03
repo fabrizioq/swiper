@@ -8,20 +8,22 @@ export default function History({ swiper, extendParams, on }) {
       replaceState: false,
       key: 'slides',
       keepQuery: false,
+      prefixUrl: '',
     },
   });
 
   let initialized = false;
   let paths = {};
 
-  const slugify = (text) => {
-    return text
+  const slugify = (txt) => {
+    let text = txt
       .toString()
       .replace(/\s+/g, '-')
       .replace(/[^\w-]+/g, '')
       .replace(/--+/g, '-')
       .replace(/^-+/, '')
       .replace(/-+$/, '');
+    return swiper.params.history.prefixUrl + text
   };
 
   const getPathValues = (urlOverride) => {
@@ -54,7 +56,8 @@ export default function History({ swiper, extendParams, on }) {
       swiper.virtual && swiper.params.virtual.enabled
         ? swiper.slidesEl.querySelector(`[data-swiper-slide-index="${index}"]`)
         : swiper.slides[index];
-    let value = slugify(slide.getAttribute('data-history'));
+    const attr = slide.getAttribute('data-history') || slide.children[0].getAttribute('data-history');
+    let value = slugify(attr);
     if (swiper.params.history.root.length > 0) {
       let root = swiper.params.history.root;
       if (root[root.length - 1] === '/') root = root.slice(0, root.length - 1);
@@ -80,7 +83,8 @@ export default function History({ swiper, extendParams, on }) {
     if (value) {
       for (let i = 0, length = swiper.slides.length; i < length; i += 1) {
         const slide = swiper.slides[i];
-        const slideHistory = slugify(slide.getAttribute('data-history'));
+        const attr = slide.getAttribute('data-history') || slide.children[0].getAttribute('data-history');
+        const slideHistory = slugify(attr);
         if (slideHistory === value) {
           const index = swiper.getSlideIndex(slide);
           swiper.slideTo(index, speed, runCallbacks);
